@@ -20,6 +20,17 @@ function ActivityDetailModal({
 
   if (!open || !activity) return null;
 
+  const targetGroupCounts =
+    activity.targetGroupCounts ||
+    activity.supportGroups ||
+    activity.support_groups ||
+    {};
+
+  const totalSupported = Object.values(targetGroupCounts).reduce(
+    (sum, value) => sum + Number(value || 0),
+    0
+  );
+
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("vi-VN");
   };
@@ -87,17 +98,42 @@ function ActivityDetailModal({
 
             <InfoItem
               label="Số lượng tiếp nhận hỗ trợ"
-              value={activity.supportedCount}
+              value={totalSupported || activity.supportedCount}
             />
+
+            <div className="md:col-span-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              <p className="mb-3 text-sm font-bold text-gray-500">
+                Chi tiết đối tượng tiếp nhận hỗ trợ
+              </p>
+
+              {Object.keys(targetGroupCounts).length === 0 ? (
+                <p className="italic text-gray-500">
+                  Chưa có dữ liệu.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {Object.entries(targetGroupCounts).map(([group, count]) => (
+                    <div
+                      key={group}
+                      className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3"
+                    >
+                      <span className="font-medium text-gray-700">
+                        {group}
+                      </span>
+
+                      <span className="rounded-lg bg-green-100 px-3 py-1 font-bold text-green-700">
+                        {Number(count || 0)} lượt
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </Section>
 
-          {(activity.note || activity.cancelReason) && (
+          {activity.note && (
             <Section title="Ghi chú bổ sung">
-              {activity.status === "Đã hủy" && activity.cancelReason && (
-                <InfoItem label="Lý do hủy" value={activity.cancelReason} />
-              )}
-
-              {activity.note && <InfoItem label="Ghi chú" value={activity.note} />}
+              <InfoItem label="Ghi chú" value={activity.note} />
             </Section>
           )}
 

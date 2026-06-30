@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import accounts from "../data/accounts";
 import { useAuth } from "../context/AuthContext";
+import { supabase } from "../lib/supabase";
 
 import logoGroup from "../assets/logos/logo-group.png";
 import logoMhx from "../assets/logos/logo-mhx-2026.png";
@@ -13,20 +13,40 @@ function Login() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    const account = accounts.find(
-      (item) => item.username === username && item.password === password
-    );
+    const { data: account, error } = await supabase
+      .from("accounts")
+      .select("*")
+      .eq("username", username.trim())
+      .eq("password", password)
+      .maybeSingle();
+
+    setIsLoading(false);
+
+    if (error) {
+      console.error(error);
+      alert("Không thể kết nối database!");
+      return;
+    }
 
     if (!account) {
       alert("Sai tài khoản hoặc mật khẩu!");
       return;
     }
 
-    login(account);
+    login({
+      id: account.id,
+      username: account.username,
+      role: account.role,
+      team: account.team,
+      name: account.full_name,
+      fullName: account.full_name,
+    });
 
     if (account.role === "admin") {
       navigate("/admin");
@@ -46,17 +66,9 @@ function Login() {
         </p>
 
         <div className="mt-4 flex items-center justify-between">
-          <img
-            src={logoGroup}
-            alt="Logo đơn vị"
-            className="h-28 object-contain"
-          />
+          <img src={logoGroup} alt="Logo đơn vị" className="h-28 object-contain" />
 
-          <img
-            src={logoMhx}
-            alt="Mùa hè xanh 2026"
-            className="h-34 object-contain"
-          />
+          <img src={logoMhx} alt="Mùa hè xanh 2026" className="h-34 object-contain" />
         </div>
 
         <div className="mt-4 text-center">
@@ -131,9 +143,10 @@ function Login() {
 
               <button
                 type="submit"
-                className="w-full rounded-xl bg-green-600 py-3 text-lg font-black text-white shadow-lg transition hover:bg-green-700"
+                disabled={isLoading}
+                className="w-full rounded-xl bg-green-600 py-3 text-lg font-black text-white shadow-lg transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
               >
-                Đăng nhập
+                {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
               </button>
             </form>
           </div>
