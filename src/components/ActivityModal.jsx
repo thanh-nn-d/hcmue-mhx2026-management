@@ -407,13 +407,17 @@ function ActivityModal({ open, onClose, onSave, activity }) {
                     </p>
                   </div>
 
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/png,image/webp"
-                    multiple
-                    onChange={handleImageChange}
-                    className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3"
-                  />
+                  <label className="inline-flex cursor-pointer items-center rounded-xl bg-blue-600 px-5 py-3 font-bold text-white shadow transition hover:bg-blue-700">
+                    📤 Chọn ảnh minh chứng
+
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      multiple
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
 
                   {formData.evidenceImages.length > 0 && (
                     <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
@@ -452,12 +456,16 @@ function ActivityModal({ open, onClose, onSave, activity }) {
 
                   </div>
 
-                  <input
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={handleExcelChange}
-                    className="w-full rounded-xl border border-purple-200 bg-white px-4 py-3"
-                  />
+                  <label className="inline-flex cursor-pointer items-center rounded-xl bg-purple-600 px-5 py-3 font-bold text-white shadow transition hover:bg-purple-700">
+                    📤 Chọn file Excel
+
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={handleExcelChange}
+                      className="hidden"
+                    />
+                  </label>
 
                   {formData.participantFile && (
                     <div className="mt-4 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm">
