@@ -430,7 +430,9 @@ function ActivityModal({ open, onClose, onSave, activity }) {
                 </div>
 
                 <div className="md:col-span-2 rounded-2xl border border-purple-100 bg-purple-50 p-5">
-                  <div className="mb-4">
+                <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+
+                  <div>
                     <p className="text-lg font-black text-purple-700">
                       Danh sách chiến sĩ tham gia
                     </p>
@@ -438,6 +440,16 @@ function ActivityModal({ open, onClose, onSave, activity }) {
                     <p className="text-sm text-gray-600">
                       Tải lên file Excel định dạng .xlsx hoặc .xls.
                     </p>
+                  </div>
+
+                  <a
+                    href="/templates/danh-sach-chien-si-mau.xlsx"
+                    download
+                    className="inline-flex items-center justify-center rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold text-white shadow transition hover:bg-purple-700"
+                  >
+                    📥 Tải file mẫu
+                  </a>
+
                   </div>
 
                   <input
