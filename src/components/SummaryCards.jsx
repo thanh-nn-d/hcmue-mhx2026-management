@@ -1,5 +1,19 @@
 import { supportGroups } from "../data/supportGroups";
 
+function calculateActivityHours(activity) {
+  if (!activity.startTime || !activity.endTime) return 0;
+
+  const [startHour, startMinute] = activity.startTime.split(":").map(Number);
+  const [endHour, endMinute] = activity.endTime.split(":").map(Number);
+
+  const start = startHour * 60 + startMinute;
+  const end = endHour * 60 + endMinute;
+
+  if (end <= start) return 0;
+
+  return (end - start) / 60;
+}
+
 function SummaryCards({ activities }) {
   const totalActivities = activities.length;
 
@@ -14,6 +28,10 @@ function SummaryCards({ activities }) {
   const completedActivities = activities.filter(
     (activity) => activity.status === "Đã hoàn thành"
   );
+
+  const totalVolunteerHours = completedActivities.reduce((sum, activity) => {
+    return sum + calculateActivityHours(activity);
+  }, 0);
 
   const completedCount = completedActivities.length;
 
@@ -74,7 +92,7 @@ function SummaryCards({ activities }) {
       <div className="rounded-3xl border border-white/60 bg-white/95 p-6 shadow-lg backdrop-blur transition hover:-translate-y-1 hover:shadow-xl">
         <div className="mb-5">
           <h3 className="text-xl font-black text-gray-800">
-            Tiến độ hoạt động
+            TIẾN ĐỘ HOẠT ĐỘNG
           </h3>
 
           <p className="text-sm text-gray-500">
@@ -138,7 +156,7 @@ function SummaryCards({ activities }) {
       <div className="rounded-3xl border border-white/60 bg-white/95 p-6 shadow-lg backdrop-blur transition hover:-translate-y-1 hover:shadow-xl">
         <div className="mb-5">
           <h3 className="text-xl font-black text-gray-800">
-            Đối tượng tiếp nhận hỗ trợ
+            ĐỐI TƯỢNG TIẾP NHẬN HỖ TRỢ
           </h3>
 
           <p className="text-sm text-gray-500">

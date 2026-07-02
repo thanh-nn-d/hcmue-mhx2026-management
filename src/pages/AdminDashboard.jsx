@@ -5,13 +5,11 @@ import SummaryCards from "../components/SummaryCards";
 import ActivityTable from "../components/ActivityTable";
 import ActivityDetailModal from "../components/ActivityDetailModal";
 import AccountManagement from "../components/AccountManagement";
-
 import useActivities from "../hooks/useActivities";
 import useActivityFilter from "../hooks/useActivityFilter";
-
 import { teamConfig } from "../data/teamConfig";
-
 import bgSkyCity from "../assets/backgrounds/bg-sky-soft.png";
+import VolunteerHoursByTeamChart from "../components/VolunteerHoursByTeamChart";
 
 function AdminDashboard() {
   const { user, logout } = useAuth();
@@ -176,6 +174,9 @@ function AdminDashboard() {
         </div>
 
         <SummaryCards activities={activities} />
+        {activeTab === "activities" && (
+          <VolunteerHoursByTeamChart activities={activities} />
+        )}
 
         <div className="mb-6 mt-6 flex gap-3">
 

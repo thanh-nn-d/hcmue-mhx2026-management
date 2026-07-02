@@ -5,6 +5,7 @@ import ActivityModal from "../components/ActivityModal";
 import ActivityTable from "../components/ActivityTable";
 import ActivityDetailModal from "../components/ActivityDetailModal";
 import SummaryCards from "../components/SummaryCards";
+import VolunteerHoursCard from "../components/VolunteerHoursCard";
 import useActivities from "../hooks/useActivities";
 import useActivityFilter from "../hooks/useActivityFilter";
 import { activityPoints } from "../data/activityPoints";
@@ -150,6 +151,10 @@ function TeamDashboard() {
         </div>
 
         <SummaryCards activities={teamActivities} />
+
+        <VolunteerHoursCard
+          activities={teamActivities}
+        />
 
         {unreadFeedbacks.length > 0 && (
           <div
