@@ -402,13 +402,13 @@ function ActivityModal({ open, onClose, onSave, activity }) {
                     </p>
 
                     <p className="text-sm text-gray-600">
-                      Tải tối thiểu 02 ảnh và tối đa 05 ảnh. Chấp nhận JPG,
+                      Tải tối thiểu 02 ảnh, tối đa 05 ảnh. Chấp nhận JPG,
                       JPEG, PNG, WEBP.
                     </p>
                   </div>
 
                   <label className="inline-flex cursor-pointer items-center rounded-xl bg-blue-600 px-5 py-3 font-bold text-white shadow transition hover:bg-blue-700">
-                    📤 Chọn ảnh minh chứng
+                    📤 Tải ảnh
 
                     <input
                       type="file"
@@ -442,7 +442,7 @@ function ActivityModal({ open, onClose, onSave, activity }) {
                     </p>
 
                     <p className="text-sm text-gray-600">
-                      Tải lên file Excel định dạng .xlsx hoặc .xls.
+                      Tải lên file định dạng .xlsx hoặc .xls.
                     </p>
                   </div>
 
@@ -457,7 +457,7 @@ function ActivityModal({ open, onClose, onSave, activity }) {
                   </div>
 
                   <label className="inline-flex cursor-pointer items-center rounded-xl bg-purple-600 px-5 py-3 font-bold text-white shadow transition hover:bg-purple-700">
-                    📤 Chọn file Excel
+                    📤 Chọn file 
 
                     <input
                       type="file"
