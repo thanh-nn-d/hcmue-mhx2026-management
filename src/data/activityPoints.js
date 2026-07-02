@@ -10,8 +10,4 @@ export const activityPoints = {
       "Xã Bình Lợi",
       "Xã An Long",
     ],
-  
-    "Bình dân học vụ số": [
-      "Bình dân học vụ số",
-    ],
   };

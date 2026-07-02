@@ -13,11 +13,15 @@ function ActivityModal({ open, onClose, onSave, activity }) {
   const emptyForm = {
     activityName: "",
     activityDate: "",
+    startTime: "",
+    endTime: "",
     assignedPoint: "",
     activityLocation: "",
     soldierCount: "",
     targetGroupCounts: {},
     status: "Đang ráp nối",
+    evidenceImages: [],
+    participantFile: null,
     note: "",
   };
 
@@ -28,21 +32,25 @@ function ActivityModal({ open, onClose, onSave, activity }) {
       setFormData({
         activityName: activity.activityName || "",
         activityDate: activity.activityDate || "",
+        startTime: activity.startTime || "",
+        endTime: activity.endTime || "",
         assignedPoint: activity.assignedPoint || "",
         activityLocation: activity.activityLocation || "",
         soldierCount: activity.soldierCount || "",
         targetGroupCounts: activity.targetGroupCounts || {},
         status: activity.status || "Đang ráp nối",
+        evidenceImages: activity.evidenceImages || [],
+        participantFile: activity.participantFile || null,
         note: activity.note || "",
       });
-
-      return;
+    } else {
+      setFormData(emptyForm);
     }
-
-    setFormData(emptyForm);
   }, [activity, open]);
 
   if (!open) return null;
+
+  const isCompleted = formData.status === "Đã hoàn thành";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -80,23 +88,96 @@ function ActivityModal({ open, onClose, onSave, activity }) {
     }));
   };
 
-  const totalSupportedCount = Object.values(
-    formData.targetGroupCounts
-  ).reduce((sum, value) => sum + Number(value || 0), 0);
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files || []);
+
+    if (files.length > 5) {
+      alert("Chỉ được tải tối đa 05 ảnh minh chứng.");
+      e.target.value = "";
+      return;
+    }
+
+    const validImages = files.every((file) =>
+      ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(file.type)
+    );
+
+    if (!validImages) {
+      alert("Ảnh minh chứng chỉ chấp nhận JPG, JPEG, PNG hoặc WEBP.");
+      e.target.value = "";
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      evidenceImages: files,
+    }));
+  };
+
+  const handleExcelChange = (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const extension = file.name.split(".").pop().toLowerCase();
+
+    if (!["xlsx", "xls"].includes(extension)) {
+      alert("Danh sách chiến sĩ chỉ chấp nhận file Excel (.xlsx hoặc .xls).");
+      e.target.value = "";
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      participantFile: file,
+    }));
+  };
+
+  const totalSupportedCount = Object.values(formData.targetGroupCounts).reduce(
+    (sum, value) => sum + Number(value || 0),
+    0
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (formData.startTime && formData.endTime) {
+      if (formData.startTime >= formData.endTime) {
+        alert("Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc.");
+        return;
+      }
+    }
+
+    if (isCompleted) {
+      if (formData.evidenceImages.length < 2) {
+        alert("Vui lòng tải tối thiểu 02 ảnh minh chứng.");
+        return;
+      }
+
+      if (formData.evidenceImages.length > 5) {
+        alert("Chỉ được tải tối đa 05 ảnh minh chứng.");
+        return;
+      }
+
+      if (!formData.participantFile) {
+        alert("Vui lòng tải danh sách chiến sĩ tham gia hoạt động.");
+        return;
+      }
+    }
 
     const activityData = {
       team: user.team,
       activityName: formData.activityName,
       activityDate: formData.activityDate,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
       assignedPoint: hasAssignedPoint ? formData.assignedPoint : "",
       activityLocation: formData.activityLocation,
-      soldierCount: Number(formData.soldierCount),
+      soldierCount: Number(formData.soldierCount || 0),
       supportedCount: totalSupportedCount,
       targetGroupCounts: formData.targetGroupCounts,
       status: formData.status,
+      evidenceImages: formData.evidenceImages,
+      participantFile: formData.participantFile,
       note: formData.note,
     };
 
@@ -115,7 +196,7 @@ function ActivityModal({ open, onClose, onSave, activity }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div className="flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div className="border-b bg-green-600 px-8 py-5 text-white">
           <h2 className="text-2xl font-black">
             {activity ? "Sửa hoạt động" : "Thêm hoạt động"}
@@ -128,42 +209,60 @@ function ActivityModal({ open, onClose, onSave, activity }) {
 
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
           <div className="overflow-y-auto px-8 py-6">
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <FormSection title="I. Thông tin chung">
               <div className="md:col-span-2">
-                <label className="mb-2 block font-bold text-gray-700">
-                  Tên hoạt động
-                </label>
+                <Label>Tên hoạt động</Label>
 
-                <input
+                <Input
                   type="text"
                   name="activityName"
                   value={formData.activityName}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-100"
                   required
                 />
               </div>
 
               <div>
-                <label className="mb-2 block font-bold text-gray-700">
-                  Ngày hoạt động
-                </label>
+                <Label>Ngày hoạt động</Label>
 
-                <input
+                <Input
                   type="date"
                   name="activityDate"
                   value={formData.activityDate}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-100"
                   required
                 />
               </div>
 
+              <div>
+                <Label>Thời gian dự kiến</Label>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    type="time"
+                    name="startTime"
+                    value={formData.startTime}
+                    onChange={handleChange}
+                    required
+                  />
+
+                  <Input
+                    type="time"
+                    name="endTime"
+                    value={formData.endTime}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <p className="mt-1 text-xs text-gray-500">
+                  Ví dụ: 07:00 đến 11:00
+                </p>
+              </div>
+
               {hasAssignedPoint && (
                 <div>
-                  <label className="mb-2 block font-bold text-gray-700">
-                    Điểm phụ trách
-                  </label>
+                  <Label>Điểm phụ trách</Label>
 
                   <select
                     name="assignedPoint"
@@ -183,41 +282,20 @@ function ActivityModal({ open, onClose, onSave, activity }) {
                 </div>
               )}
 
-              <div className={hasAssignedPoint ? "md:col-span-2" : ""}>
-                <label className="mb-2 block font-bold text-gray-700">
-                  Địa điểm hoạt động
-                </label>
+              <div className={hasAssignedPoint ? "" : "md:col-span-2"}>
+                <Label>Địa điểm thực hiện</Label>
 
-                <input
+                <Input
                   type="text"
                   name="activityLocation"
                   value={formData.activityLocation}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-100"
                   required
                 />
               </div>
 
               <div>
-                <label className="mb-2 block font-bold text-gray-700">
-                  Số lượng chiến sĩ tham gia
-                </label>
-
-                <input
-                  type="number"
-                  name="soldierCount"
-                  value={formData.soldierCount}
-                  onChange={handleChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-100"
-                  min="0"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block font-bold text-gray-700">
-                  Trạng thái
-                </label>
+                <Label>Trạng thái</Label>
 
                 <select
                   name="status"
@@ -229,6 +307,21 @@ function ActivityModal({ open, onClose, onSave, activity }) {
                   <option>Đã chốt</option>
                   <option>Đã hoàn thành</option>
                 </select>
+              </div>
+            </FormSection>
+
+            <FormSection title="II. Thống kê hoạt động">
+              <div>
+                <Label>Số lượng chiến sĩ tham gia</Label>
+
+                <Input
+                  type="number"
+                  name="soldierCount"
+                  value={formData.soldierCount}
+                  onChange={handleChange}
+                  min="0"
+                  required
+                />
               </div>
 
               <div className="md:col-span-2 rounded-2xl border border-green-100 bg-green-50 p-5">
@@ -281,7 +374,7 @@ function ActivityModal({ open, onClose, onSave, activity }) {
                         </label>
 
                         {checked && (
-                          <input
+                          <Input
                             type="number"
                             min="0"
                             value={formData.targetGroupCounts[group]}
@@ -289,7 +382,7 @@ function ActivityModal({ open, onClose, onSave, activity }) {
                               handleGroupCountChange(group, e.target.value)
                             }
                             placeholder="Nhập số lượng..."
-                            className="mt-3 w-full rounded-xl border border-gray-300 px-4 py-2 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-100"
+                            className="mt-3"
                             required
                           />
                         )}
@@ -298,21 +391,83 @@ function ActivityModal({ open, onClose, onSave, activity }) {
                   })}
                 </div>
               </div>
+            </FormSection>
 
+            {isCompleted && (
+              <FormSection title="III. Báo cáo minh chứng">
+                <div className="md:col-span-2 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                  <div className="mb-4">
+                    <p className="text-lg font-black text-blue-700">
+                      Ảnh minh chứng hoạt động
+                    </p>
+
+                    <p className="text-sm text-gray-600">
+                      Tải tối thiểu 02 ảnh và tối đa 05 ảnh. Chấp nhận JPG,
+                      JPEG, PNG, WEBP.
+                    </p>
+                  </div>
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    multiple
+                    onChange={handleImageChange}
+                    className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3"
+                  />
+
+                  {formData.evidenceImages.length > 0 && (
+                    <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
+                      {formData.evidenceImages.map((file, index) => (
+                        <div
+                          key={`${file.name || file.url}-${index}`}
+                          className="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm"
+                        >
+                          📷 {file.name || `Ảnh minh chứng ${index + 1}`}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="md:col-span-2 rounded-2xl border border-purple-100 bg-purple-50 p-5">
+                  <div className="mb-4">
+                    <p className="text-lg font-black text-purple-700">
+                      Danh sách chiến sĩ tham gia
+                    </p>
+
+                    <p className="text-sm text-gray-600">
+                      Tải lên file Excel định dạng .xlsx hoặc .xls.
+                    </p>
+                  </div>
+
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleExcelChange}
+                    className="w-full rounded-xl border border-purple-200 bg-white px-4 py-3"
+                  />
+
+                  {formData.participantFile && (
+                    <div className="mt-4 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm">
+                      📄 {formData.participantFile.name || "File danh sách"}
+                    </div>
+                  )}
+                </div>
+              </FormSection>
+            )}
+
+            <FormSection title="IV. Ghi chú">
               <div className="md:col-span-2">
-                <label className="mb-2 block font-bold text-gray-700">
-                  Ghi chú
-                </label>
-
                 <textarea
                   rows="4"
                   name="note"
                   value={formData.note}
                   onChange={handleChange}
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-100"
+                  placeholder="Nhập ghi chú nếu có..."
                 />
               </div>
-            </div>
+            </FormSection>
           </div>
 
           <div className="flex justify-end gap-3 border-t bg-gray-50 px-8 py-4">
@@ -334,6 +489,31 @@ function ActivityModal({ open, onClose, onSave, activity }) {
         </form>
       </div>
     </div>
+  );
+}
+
+function FormSection({ title, children }) {
+  return (
+    <div className="mb-8 last:mb-0">
+      <h3 className="mb-4 border-l-4 border-green-500 pl-3 text-lg font-black text-gray-800">
+        {title}
+      </h3>
+
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">{children}</div>
+    </div>
+  );
+}
+
+function Label({ children }) {
+  return <label className="mb-2 block font-bold text-gray-700">{children}</label>;
+}
+
+function Input({ className = "", ...props }) {
+  return (
+    <input
+      {...props}
+      className={`w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-100 ${className}`}
+    />
   );
 }
 

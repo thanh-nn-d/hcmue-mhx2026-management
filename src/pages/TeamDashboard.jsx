@@ -10,6 +10,7 @@ import useActivityFilter from "../hooks/useActivityFilter";
 import { activityPoints } from "../data/activityPoints";
 import { teamConfig } from "../data/teamConfig";
 import bgSkyCity from "../assets/backgrounds/bg-sky-soft.png";
+import ChangePasswordModal from "../components/ChangePasswordModal";
 
 function TeamDashboard() {
   const { user, logout } = useAuth();
@@ -28,6 +29,7 @@ function TeamDashboard() {
   const [openModal, setOpenModal] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
   const [openDetail, setOpenDetail] = useState(false);
+  const [openChangePassword, setOpenChangePassword] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(null);
 
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -129,12 +131,21 @@ function TeamDashboard() {
               </p>
             </div>
 
-            <button
-              onClick={handleLogout}
-              className="rounded-xl bg-green-600 px-3 py-1 font-bold text-white shadow transition hover:bg-green-700"
-            >
-              Đăng xuất
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setOpenChangePassword(true)}
+                className="rounded-xl bg-blue-600 px-3 py-1 font-bold text-white shadow transition hover:bg-blue-700"
+              >
+                Đổi mật khẩu
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="rounded-xl bg-green-600 px-3 py-1 font-bold text-white shadow transition hover:bg-green-700"
+              >
+                Đăng xuất
+              </button>
+            </div>
           </div>
         </div>
 
@@ -260,6 +271,10 @@ function TeamDashboard() {
           setOpenDetail(false);
           setSelectedActivity(null);
         }}
+      />
+      <ChangePasswordModal
+        open={openChangePassword}
+        onClose={() => setOpenChangePassword(false)}
       />
     </div>
   );
