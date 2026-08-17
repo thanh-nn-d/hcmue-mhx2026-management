@@ -13,6 +13,10 @@ import { teamConfig } from "../data/teamConfig";
 import bgSkyCity from "../assets/backgrounds/bg-sky-soft.png";
 import ChangePasswordModal from "../components/ChangePasswordModal";
 
+// Tạm khóa quyền thêm / sửa / xóa hoạt động của đội hình.
+// Đổi thành true khi muốn mở lại quyền chỉnh sửa.
+const TEAM_EDITING_ENABLED = false;
+
 function TeamDashboard() {
   const { user, logout } = useAuth();
 
@@ -231,12 +235,14 @@ function TeamDashboard() {
               <option value="oldest">Cũ nhất</option>
             </select>
 
-            <button
-              onClick={() => setOpenModal(true)}
-              className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white shadow transition hover:bg-green-700"
-            >
-              + Thêm hoạt động
-            </button>
+            {TEAM_EDITING_ENABLED && (
+              <button
+                onClick={() => setOpenModal(true)}
+                className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white shadow transition hover:bg-green-700"
+              >
+                + Thêm hoạt động
+              </button>
+            )}
           </div>
         </div>
 
@@ -257,6 +263,8 @@ function TeamDashboard() {
             onEdit={handleEdit}
             onView={handleView}
             showAssignedPointColumn={hasAssignedPoint}
+            showEdit={TEAM_EDITING_ENABLED}
+            showDelete={TEAM_EDITING_ENABLED}
           />
         </div>
       </main>
